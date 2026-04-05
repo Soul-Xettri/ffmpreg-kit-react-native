@@ -24,15 +24,27 @@ function download(url, dest, redirects = 0) {
     process.exit(1);
   }
   const client = url.startsWith("https") ? https : http;
+  const options = {
+    headers: {
+      "User-Agent": "ffmpeg-kit-postinstall/1.0 (+node)",
+      "Accept": "*/*",
+    },
+  };
   client
-    .get(url, (res) => {
+    .get(url, options, (res) => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
         download(res.headers.location, dest, redirects + 1);
         return;
       }
       if (res.statusCode !== 200) {
         console.error("[ffmpeg-kit] Download failed:", res.statusCode);
-        process.exit(1);
+        let body = "";
+        res.on("data", (c) => { if (body.length < 500) body += c.toString(); });
+        res.on("end", () => {
+          console.error("[ffmpeg-kit] Response body:", body.slice(0, 400));
+          process.exit(1);
+        });
+        return;
       }
       const file = fs.createWriteStream(dest);
       res.pipe(file);
