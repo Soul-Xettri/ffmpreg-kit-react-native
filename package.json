@@ -11,7 +11,7 @@
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "release": "release-it",
     "prepublishOnly": "node -p \"require('./package.json').version\" > ./ffmpreg-kit/VERSION",
-    "postinstall": "node download-aar.js"
+    "postinstall": "node download-aar.js && node download-xcframework.js"
   },
   "keywords": [
     "react-native",
